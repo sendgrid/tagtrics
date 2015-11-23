@@ -5,6 +5,7 @@ tagtrics allows developers to keep all their metrics in a central `struct` using
 * **Typed Metrics** - Metrics do not have to be defined in strings.  Each metric has a type and they can be embedded in structs.  The name of each metric is derived from the structs.
 * **JSON** - All the metrics can be represented as JSON and easily exposed over an API to expose real-time stats or generate alerts.
 
+tagtrics also gathers metrics automatically for the Go runtime.
 
 # Example
 
