@@ -103,8 +103,8 @@ func main() {
 	flushInterval := time.Duration(3) * time.Second
 	metricTags := tagtrics.NewMetricTags(m, handler, flushInterval, reg, ".")
 
-	// You never want to do this in production but here we update these stats
-	// often to see how they change.
+	// You never want to update this often in production but here we update
+	// them often to see how they change.
 	metricTags.StatsGCCollection = time.Duration(3) * time.Second
 	metricTags.StatsMemCollection = time.Duration(3) * time.Second
 
