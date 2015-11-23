@@ -100,13 +100,13 @@ func main() {
 		log.Fatalf("error creating graphite handler: %v", err)
 	}
 	// Update Graphite every three seconds
-	flushInterval := time.Duration(3) * time.Second
+	flushInterval := 3 * time.Second
 	metricTags := tagtrics.NewMetricTags(m, handler, flushInterval, reg, ".")
 
 	// You never want to update this often in production but here we update
 	// them often to see how they change.
-	metricTags.StatsGCCollection = time.Duration(3) * time.Second
-	metricTags.StatsMemCollection = time.Duration(3) * time.Second
+	metricTags.StatsGCCollection = 3 * time.Second
+	metricTags.StatsMemCollection = 3 * time.Second
 
 	// Update graphite periodically in the background
 	go metricTags.Run()
@@ -114,6 +114,7 @@ func main() {
 	http.ListenAndServe("127.0.0.1:7890", &myApp)
 	metricTags.Stop()
 }
+
 ```
 
 Once running, the stats should change after each request:
