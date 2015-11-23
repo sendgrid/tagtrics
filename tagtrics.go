@@ -3,6 +3,7 @@ package tagtrics
 import (
 	"bytes"
 	"reflect"
+	"strings"
 	"time"
 
 	metrics "github.com/rcrowley/go-metrics"
@@ -142,7 +143,9 @@ func (m *MetricTags) initializeFieldTagPath(fieldType reflect.Value, prefix stri
 
 		tag := field.Tag.Get("metric")
 		if tag == "" {
-			continue
+			// If tag isn't found, derive tag from the lower case name of
+			// the field.
+			tag = strings.ToLower(field.Name)
 		}
 		if prefix != "" {
 			tag = prefix + m.separator + tag

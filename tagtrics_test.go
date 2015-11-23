@@ -14,7 +14,7 @@ type testMetrics struct {
 		Counter   metrics.Counter   `metric:"counter"`
 		Timer     metrics.Timer     `metric:"timer"`
 		Meter     metrics.Meter     `metric:"meter"`
-		Gauge     metrics.Gauge     `metric:"gauge"`
+		Gauge     metrics.Gauge     // Metric should be derived from name
 		Histogram metrics.Histogram `metric:"histogram"`
 	} `metric:"subitem"`
 	Counter   metrics.Counter   `metric:"counter"`
