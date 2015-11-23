@@ -32,7 +32,7 @@ type appMetrics struct {
 	Connections struct {
 		HTTP struct {
 			Concurrent metrics.Counter `metric:"concurrent"`
-			Count      metrics.Meter   `metric:"count"`
+			Count      metrics.Meter   // metric="count", derived from field name
 			Errors     metrics.Meter   `metric:"errors"`
 			Duration   metrics.Timer   `metric:"duration"`
 		} `metric:"http"`
