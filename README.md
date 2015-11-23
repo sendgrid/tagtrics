@@ -100,12 +100,14 @@ func main() {
 		log.Fatalf("error creating graphite handler: %v", err)
 	}
 	// Update Graphite every three seconds
-	updateInterval := time.Duration(3) * time.Second
-	metricTags := tagtrics.NewMetricTags(m, handler, updateInterval, reg, ".")
+	flushInterval := time.Duration(3) * time.Second
+	metricTags := tagtrics.NewMetricTags(m, handler, flushInterval, reg, ".")
+
 	// You never want to do this in production but here we update these stats
 	// often to see how they change.
-	metricTags.StatsGCCollection = updateInterval
-	metricTags.StatsMemCollection = updateInterval
+	metricTags.StatsGCCollection = time.Duration(3) * time.Second
+	metricTags.StatsMemCollection = time.Duration(3) * time.Second
+
 	// Update graphite periodically in the background
 	go metricTags.Run()
 	myApp := app{m: m, metricTags: metricTags}
