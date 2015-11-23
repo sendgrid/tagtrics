@@ -30,7 +30,7 @@ type appMetrics struct {
 		Size metrics.Histogram `metric:"size"`
 	} `metric:"messages"`
 	Connections struct {
-		Http struct {
+		HTTP struct {
 			Concurrent metrics.Counter `metric:"concurrent"`
 			Count      metrics.Meter   `metric:"count"`
 			Errors     metrics.Meter   `metric:"errors"`
@@ -76,9 +76,9 @@ type app struct {
 func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	// Assume this connection is active
-	a.m.Connections.Http.Concurrent.Inc(1)
+	a.m.Connections.HTTP.Concurrent.Inc(1)
 	// Keep track of our connection rate
-	a.m.Connections.Http.Count.Mark(1)
+	a.m.Connections.HTTP.Count.Mark(1)
 	// The size is the length of the requested URL.  Multiple URLs that vary in
 	// length can be sent to test.
 	a.m.Messages.Size.Update(int64(len(r.RequestURI)))
@@ -86,9 +86,9 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(a.metricTags.ToJSON())
 	// Update duration
-	a.m.Connections.Http.Duration.UpdateSince(startTime)
+	a.m.Connections.HTTP.Duration.UpdateSince(startTime)
 	// Assume this connection is no longer active
-	a.m.Connections.Http.Concurrent.Dec(1)
+	a.m.Connections.HTTP.Concurrent.Dec(1)
 }
 
 func main() {
