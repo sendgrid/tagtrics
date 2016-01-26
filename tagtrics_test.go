@@ -9,6 +9,10 @@ import (
 	"github.com/rcrowley/go-metrics"
 )
 
+type subMetrics struct {
+	Counter metrics.Counter
+}
+
 type testMetrics struct {
 	SubItem struct {
 		Counter   metrics.Counter   `metric:"counter"`
@@ -22,36 +26,42 @@ type testMetrics struct {
 	Meter     metrics.Meter     `metric:"meter"`
 	Gauge     metrics.Gauge     `metric:"gauge"`
 	Histogram metrics.Histogram `metric:"histogram"`
+	Map       map[string]*subMetrics
 }
 
 type validateMetricsData struct {
-	SubCounter   map[string]float64 `json:"subitem_counter"`
-	SubTimer     map[string]float64 `json:"subitem_timer"`
-	SubMeter     map[string]float64 `json:"subitem_meter"`
-	SubGauge     map[string]float64 `json:"subitem_gauge"`
-	SubHistogram map[string]float64 `json:"subitem_histogram"`
-	Counter      map[string]float64 `json:"counter"`
-	Timer        map[string]float64 `json:"timer"`
-	Meter        map[string]float64 `json:"meter"`
-	Gauge        map[string]float64 `json:"gauge"`
-	Histogram    map[string]float64 `json:"histogram"`
+	SubCounter       map[string]float64 `json:"subitem_counter"`
+	SubTimer         map[string]float64 `json:"subitem_timer"`
+	SubMeter         map[string]float64 `json:"subitem_meter"`
+	SubGauge         map[string]float64 `json:"subitem_gauge"`
+	SubHistogram     map[string]float64 `json:"subitem_histogram"`
+	Counter          map[string]float64 `json:"counter"`
+	Timer            map[string]float64 `json:"timer"`
+	Meter            map[string]float64 `json:"meter"`
+	Gauge            map[string]float64 `json:"gauge"`
+	Histogram        map[string]float64 `json:"histogram"`
+	MapThing1Counter map[string]float64 `json:"map_thing1_counter"`
+	MapThing2Counter map[string]float64 `json:"map_thing2_counter"`
 }
 
 func TestMetricTags(t *testing.T) {
-	m := &testMetrics{}
+	m := &testMetrics{Map: map[string]*subMetrics{
+		"thing1": &subMetrics{},
+		"thing2": &subMetrics{},
+	}}
+
 	var once sync.Once
 	var wg sync.WaitGroup
 	wg.Add(1)
 	h := func() {
-		once.Do(func() {
-			wg.Done()
-		})
+		once.Do(wg.Done)
 	}
 	updateInterval := 100 * time.Millisecond
 	mTags := NewMetricTags(m, h, updateInterval, metrics.DefaultRegistry, "_")
 	mTags.StatsGCCollection = updateInterval
 	mTags.StatsMemCollection = updateInterval
 	go mTags.Run()
+
 	// Modify all metrics
 	m.SubItem.Counter.Inc(1)
 	m.SubItem.Timer.Update(time.Millisecond)
@@ -63,6 +73,8 @@ func TestMetricTags(t *testing.T) {
 	m.Meter.Mark(1)
 	m.Gauge.Update(1)
 	m.Histogram.Update(1)
+	m.Map["thing1"].Counter.Inc(1)
+	m.Map["thing2"].Counter.Inc(2)
 	// Make sure our update function gets called at least once
 	wg.Wait()
 	// Verify all data
@@ -100,6 +112,12 @@ func TestMetricTags(t *testing.T) {
 	}
 	if j.Histogram["count"] != 1 || j.Histogram["99.9%"] != 1 {
 		t.Fatalf("failed to verify data: %v", j.Histogram)
+	}
+	if j.MapThing1Counter["count"] != 1 {
+		t.Fatalf("failed to verify data: %v", j.MapThing1Counter)
+	}
+	if j.MapThing2Counter["count"] != 2 {
+		t.Fatalf("failed to verify data: %v", j.MapThing2Counter)
 	}
 	mTags.Stop()
 }

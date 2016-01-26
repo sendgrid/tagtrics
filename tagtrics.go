@@ -119,8 +119,10 @@ func (m *MetricTags) Stop() {
 
 // initializeFieldTagPath traverses the given struct trying to initialize
 // metric values.  The "metric" struct tag is used to determine the name of the
-// metrics for each struct field.  The name is prefixed with tags from previous
-// struct fields if any, separated by a dot.  For example
+// metrics for each struct field. If there is no "metric" struct tag, the
+// lowercased struct field name is used for the metric name. The name is
+// prefixed with tags from previous struct fields if any, separated by a dot.
+// For example:
 //
 //     	Messages struct {
 //          Smtp struct {
@@ -154,6 +156,11 @@ func (m *MetricTags) initializeFieldTagPath(fieldType reflect.Value, prefix stri
 		if field.Type.Kind() == reflect.Struct {
 			// Recursively traverse an embedded struct
 			m.initializeFieldTagPath(val, tag)
+		} else if field.Type.Kind() == reflect.Map && field.Type.Key().Kind() == reflect.String {
+			// If this is a map[string]Something, then use the string key as bucket name and recursively generate the metrics below
+			for _, k := range val.MapKeys() {
+				m.initializeFieldTagPath(val.MapIndex(k).Elem(), tag+m.separator+k.String())
+			}
 		} else {
 			// Found a field, initialize
 			switch field.Type.String() {

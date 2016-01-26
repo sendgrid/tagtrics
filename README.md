@@ -24,7 +24,9 @@ import (
 	"github.com/sendgrid/tagtrics"
 )
 
-// appMetrics holds all metrics for this application.
+// appMetrics holds all metrics for this application. You can also define
+// map[string]*??? fields for metrics that may be nested under arbitrary
+// string identifiers
 type appMetrics struct {
 	Messages struct {
 		Size metrics.Histogram `metric:"size"`
@@ -37,6 +39,11 @@ type appMetrics struct {
 			Duration   metrics.Timer   `metric:"duration"`
 		} `metric:"http"`
 	} `metric:"connections"`
+	Services map[string]*serviceMetrics
+}
+
+type serviceMetrics struct {
+	Count metrics.Counter
 }
 
 // getUpdateGraphiteHandler returns a handler that flushes existing stats in
@@ -94,7 +101,14 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Use the default registry in go-metrics
 	reg := metrics.DefaultRegistry
-	m := &appMetrics{}
+
+	// If you have a map[string]*? field, you must instantiate it before calling
+	// NewMetricTags
+	m := &appMetrics{
+		Services: map[string]*serviceMetrics{
+			"mysql": &serviceMetrics{},
+			"memcached": &serviceMetrics{},
+	}}
 	handler, err := getUpdateGraphiteHandler("localhost:1234", "dev.app.localhost", reg)
 	if err != nil {
 		log.Fatalf("error creating graphite handler: %v", err)
