@@ -1,5 +1,5 @@
 # tagtrics
-tagtrics allows developers to keep all their metrics in a central `struct` using types from the great library [go-metrics](https://github.com/rcrowley/go-metrics) and initialized with struct tags.  This allows developers to share the instance of this `struct` in the application and easiliy update metrics.  The advantages to this approach include:
+tagtrics allows developers to keep all their metrics in a central `struct` using types from the great library [go-metrics](https://github.com/rcrowley/go-metrics) and initialized with struct tags.  This allows developers to share the instance of this `struct` in the application and easily update metrics.  The advantages to this approach include:
 
 * **Logic** - The logic of the application does not change when a new system is used as a centralized metrics store.
 * **Typed Metrics** - Metrics do not have to be defined in strings.  Each metric has a type and they can be embedded in structs.  The name of each metric is derived from the structs.
